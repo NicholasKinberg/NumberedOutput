@@ -1,12 +1,35 @@
 {
   "name": "numbered-output-llm",
-  "displayName": "Numbered Output LLM",
-  "description": "VS Code extension for LLM with numbered output",
+  "displayName": "Numbered Output LLM Assistant",
+  "description": "AI coding assistant powered by Ollama with enforced numbered output for code suggestions and steps. Integrates with local Ollama instance for context-aware assistance.",
   "version": "0.0.1",
+  "publisher": "numbered-output",
+  "author": {
+    "name": "Nicholas Kinberg"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/numbered-output-llm"
+  },
+  "keywords": [
+    "ai",
+    "llm",
+    "ollama",
+    "assistant",
+    "code-assistant",
+    "numbered-output",
+    "chat",
+    "github",
+    "context"
+  ],
+  "icon": "icon.png",
   "engines": {
     "vscode": "^1.74.0"
   },
   "categories": [
+    "Machine Learning",
+    "Programming Languages",
     "Other"
   ],
   "activationEvents": [
@@ -22,6 +45,26 @@
       {
         "command": "numberedOutput.addFileContext",
         "title": "Add File Context to Chat"
+      },
+      {
+        "command": "numberedOutput.addGitHubUrl",
+        "title": "Add GitHub File from URL"
+      },
+      {
+        "command": "numberedOutput.addGitHubFile",
+        "title": "Add GitHub File to Context"
+      },
+      {
+        "command": "numberedOutput.addGitHubReadme",
+        "title": "Add GitHub Repository README"
+      },
+      {
+        "command": "numberedOutput.setGitHubToken",
+        "title": "Set GitHub Access Token"
+      },
+      {
+        "command": "numberedOutput.clearContext",
+        "title": "Clear All Context"
       }
     ],
     "configuration": {
@@ -36,6 +79,16 @@
           "type": "string",
           "default": "llama2",
           "description": "Ollama model name to use"
+        },
+        "numberedOutput.githubToken": {
+          "type": "string",
+          "default": "",
+          "description": "GitHub Personal Access Token (optional for public repos)"
+        },
+        "numberedOutput.maxContextLength": {
+          "type": "number",
+          "default": 2000,
+          "description": "Maximum length for context snippets"
         }
       }
     }
@@ -43,14 +96,23 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "test": "node ./out/test/runTest.js",
+    "lint": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/vscode": "^1.74.0",
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.10",
     "@types/node": "16.x",
+    "@types/vscode": "^1.74.0",
+    "@vscode/test-electron": "^2.5.2",
+    "glob": "^11.0.3",
+    "mocha": "^11.7.4",
     "typescript": "^4.9.4"
   },
   "dependencies": {
+    "@octokit/rest": "^22.0.0",
     "axios": "^1.6.0"
   }
 }

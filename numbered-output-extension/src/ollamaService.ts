@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import * as vscode from 'vscode';
+import { ResponseFormatter } from './responseFormatter';
 
 export interface ChatMessage {
     role: 'system' | 'user' | 'assistant';
@@ -51,7 +52,8 @@ export class OllamaService {
             );
 
             if (response.data && response.data.message) {
-                return this.formatResponse(response.data.message.content);
+                // Use ResponseFormatter for consistent formatting
+                return ResponseFormatter.format(response.data.message.content);
             }
 
             throw new Error('Invalid response from Ollama');
@@ -70,43 +72,12 @@ export class OllamaService {
         }
     }
 
+    /**
+     * Legacy method - now uses ResponseFormatter
+     * @deprecated Use ResponseFormatter.format() directly
+     */
     private formatResponse(content: string): string {
-        // Post-process the response to ensure numbered output
-        // This is a fallback in case the system message doesn't work perfectly
-        const lines = content.split('\n');
-        let formattedLines: string[] = [];
-        let stepCounter = 1;
-
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            
-            // Check if this looks like a step or instruction that should be numbered
-            if (this.shouldBeNumbered(line)) {
-                // Check if it's already numbered
-                if (!/^\d+\./.test(line)) {
-                    formattedLines.push(`${stepCounter}. ${line}`);
-                    stepCounter++;
-                } else {
-                    formattedLines.push(line);
-                }
-            } else {
-                formattedLines.push(line);
-            }
-        }
-
-        return formattedLines.join('\n');
-    }
-
-    private shouldBeNumbered(line: string): boolean {
-        // Patterns that indicate this should be numbered
-        const patterns = [
-            /^(create|add|implement|return|check|install|navigate|start|use|set|configure|build|run|test|debug)/i,
-            /^(step|instruction|action|task|process|procedure)/i,
-            /^(first|second|third|next|then|finally|last)/i,
-            /^(function|method|class|variable|import|export)/i
-        ];
-
-        return patterns.some(pattern => pattern.test(line)) && line.length > 10;
+        return ResponseFormatter.format(content);
     }
 
     async testConnection(): Promise<boolean> {

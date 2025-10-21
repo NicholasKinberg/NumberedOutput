@@ -1,0 +1,416 @@
+/**
+ * Custom Styles for Numbered Output LLM Chat Interface
+ * Provides modern, clean styling for the chat UI
+ */
+
+:root {
+    --container-padding: 20px;
+    --border-radius: 8px;
+    --transition-speed: 0.2s;
+    --message-spacing: 12px;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    font-family: var(--vscode-font-family);
+    font-size: var(--vscode-font-size);
+    color: var(--vscode-foreground);
+    background-color: var(--vscode-editor-background);
+}
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 100%;
+}
+
+/* Header Styles */
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px var(--container-padding);
+    border-bottom: 1px solid var(--vscode-panel-border);
+    background-color: var(--vscode-sideBar-background);
+}
+
+.chat-header h3 {
+    margin: 0;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--vscode-foreground);
+}
+
+/* Messages Container */
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--container-padding);
+    display: flex;
+    flex-direction: column;
+    gap: var(--message-spacing);
+    scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar */
+.chat-messages::-webkit-scrollbar {
+    width: 10px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: var(--vscode-scrollbarSlider-background);
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: var(--vscode-scrollbarSlider-activeBackground);
+    border-radius: 5px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+    background: var(--vscode-scrollbarSlider-hoverBackground);
+}
+
+/* Message Styles */
+.message {
+    padding: 12px 16px;
+    border-radius: var(--border-radius);
+    margin-bottom: 8px;
+    max-width: 85%;
+    word-wrap: break-word;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.user-message {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    align-self: flex-end;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+}
+
+.assistant-message {
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border: 1px solid var(--vscode-input-border);
+    align-self: flex-start;
+    margin-right: auto;
+    border-bottom-left-radius: 4px;
+}
+
+.message-content {
+    line-height: 1.6;
+}
+
+/* Numbered List Styling */
+.message-content ol {
+    margin: 8px 0;
+    padding-left: 24px;
+}
+
+.message-content ol li {
+    margin: 6px 0;
+    padding-left: 8px;
+}
+
+/* Code Block Styling */
+.message-content pre {
+    background-color: var(--vscode-textCodeBlock-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 4px;
+    padding: 12px;
+    margin: 8px 0;
+    overflow-x: auto;
+    font-family: var(--vscode-editor-font-family);
+    font-size: 0.9em;
+}
+
+.message-content code {
+    background-color: var(--vscode-textCodeBlock-background);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: var(--vscode-editor-font-family);
+    font-size: 0.9em;
+}
+
+.message-content pre code {
+    background-color: transparent;
+    padding: 0;
+}
+
+/* Inline formatting */
+.message-content strong {
+    font-weight: 600;
+    color: var(--vscode-textPreformat-foreground);
+}
+
+.message-content em {
+    font-style: italic;
+    color: var(--vscode-descriptionForeground);
+}
+
+/* Input Container */
+.chat-input-container {
+    border-top: 1px solid var(--vscode-panel-border);
+    background-color: var(--vscode-sideBar-background);
+    padding: var(--container-padding);
+}
+
+.typing-indicator {
+    padding: 8px 12px;
+    background-color: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.typing-indicator::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--vscode-badge-foreground);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.input-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+/* Textarea Styles */
+#message-input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid var(--vscode-input-border);
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border-radius: var(--border-radius);
+    font-family: var(--vscode-font-family);
+    font-size: var(--vscode-font-size);
+    resize: none;
+    min-height: 60px;
+    max-height: 200px;
+    transition: border-color var(--transition-speed);
+}
+
+#message-input:focus {
+    outline: none;
+    border-color: var(--vscode-focusBorder);
+}
+
+#message-input::placeholder {
+    color: var(--vscode-input-placeholderForeground);
+}
+
+/* Button Styles */
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--border-radius);
+    font-family: var(--vscode-font-family);
+    font-size: var(--vscode-font-size);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    font-weight: 500;
+}
+
+.send-button {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    min-width: 80px;
+}
+
+.send-button:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+.send-button:active {
+    transform: scale(0.98);
+}
+
+.clear-button {
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    padding: 6px 12px;
+    font-size: 0.9em;
+}
+
+.clear-button:hover {
+    background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+/* Disabled state */
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Error Message */
+.error-message {
+    background-color: var(--vscode-inputValidation-errorBackground);
+    border: 1px solid var(--vscode-inputValidation-errorBorder);
+    color: var(--vscode-errorForeground);
+}
+
+/* Success Message */
+.success-message {
+    background-color: var(--vscode-terminal-ansiGreen);
+    color: var(--vscode-terminal-ansiBrightWhite);
+}
+
+/* Info Message */
+.info-message {
+    background-color: var(--vscode-terminal-ansiBlue);
+    color: var(--vscode-terminal-ansiBrightWhite);
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    :root {
+        --container-padding: 12px;
+    }
+
+    .message {
+        max-width: 95%;
+    }
+
+    .input-wrapper {
+        flex-direction: column;
+    }
+
+    .send-button {
+        width: 100%;
+    }
+}
+
+/* Link Styles */
+.message-content a {
+    color: var(--vscode-textLink-foreground);
+    text-decoration: none;
+}
+
+.message-content a:hover {
+    text-decoration: underline;
+    color: var(--vscode-textLink-activeForeground);
+}
+
+/* Blockquote Styles */
+.message-content blockquote {
+    border-left: 3px solid var(--vscode-textBlockQuote-border);
+    background-color: var(--vscode-textBlockQuote-background);
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-style: italic;
+}
+
+/* Table Styles */
+.message-content table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 12px 0;
+}
+
+.message-content table th,
+.message-content table td {
+    border: 1px solid var(--vscode-panel-border);
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.message-content table th {
+    background-color: var(--vscode-editor-lineHighlightBackground);
+    font-weight: 600;
+}
+
+/* Loading Animation */
+.loading-dots {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.loading-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: currentColor;
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.loading-dots span:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.loading-dots span:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+    0%, 80%, 100% {
+        transform: scale(0);
+    }
+    40% {
+        transform: scale(1);
+    }
+}
+
+/* Context Badge */
+.context-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background-color: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    border-radius: 12px;
+    font-size: 0.8em;
+    margin-right: 4px;
+}
+
+/* Timestamp */
+.message-timestamp {
+    font-size: 0.75em;
+    color: var(--vscode-descriptionForeground);
+    margin-top: 4px;
+    opacity: 0.7;
+}
+
+/* Copy Code Button */
+.copy-code-button {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    padding: 4px 8px;
+    font-size: 0.8em;
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+}
+
+.copy-code-button:hover {
+    background-color: var(--vscode-button-secondaryHoverBackground);
+}
+

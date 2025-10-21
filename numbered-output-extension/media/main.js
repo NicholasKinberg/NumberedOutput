@@ -1,3 +1,4 @@
+/* global acquireVsCodeApi */
 (function() {
     const vscode = acquireVsCodeApi();
     

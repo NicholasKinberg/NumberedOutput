@@ -2,10 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContextManager = void 0;
 const vscode = require("vscode");
+const rest_1 = require("@octokit/rest");
 class ContextManager {
     constructor() {
         this._fileContexts = new Map();
         this._githubContexts = new Map();
+        this._octokit = null;
     }
     addFileContext(fileName, content) {
         // Limit content size to avoid token limits
@@ -115,6 +117,174 @@ class ContextManager {
             summary += `, ${githubCount} repository/ies`;
         }
         return summary;
+    }
+    /**
+     * Initialize Octokit with GitHub token
+     * @param token GitHub personal access token (optional)
+     */
+    initializeGitHub(token) {
+        this._octokit = new rest_1.Octokit({
+            auth: token
+        });
+    }
+    /**
+     * Fetch file content from a GitHub repository
+     * @param owner Repository owner
+     * @param repo Repository name
+     * @param path Path to file in repository
+     * @param ref Branch or commit ref (default: main)
+     */
+    async fetchGitHubFile(owner, repo, path, ref = 'main') {
+        try {
+            if (!this._octokit) {
+                this.initializeGitHub();
+            }
+            const response = await this._octokit.repos.getContent({
+                owner,
+                repo,
+                path,
+                ref
+            });
+            if ('content' in response.data && typeof response.data.content === 'string') {
+                // Decode base64 content
+                const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
+                const contextKey = `${owner}/${repo}/${path}`;
+                this.addGitHubContext(contextKey, content);
+                vscode.window.showInformationMessage(`Added GitHub context from ${contextKey}`);
+            }
+            else {
+                throw new Error('Invalid file content received from GitHub');
+            }
+        }
+        catch (error) {
+            console.error('Error fetching GitHub file:', error);
+            vscode.window.showErrorMessage(`Failed to fetch GitHub file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            throw error;
+        }
+    }
+    /**
+     * Fetch multiple files from a GitHub repository directory
+     * @param owner Repository owner
+     * @param repo Repository name
+     * @param path Path to directory in repository
+     * @param ref Branch or commit ref (default: main)
+     */
+    async fetchGitHubDirectory(owner, repo, path, ref = 'main') {
+        try {
+            if (!this._octokit) {
+                this.initializeGitHub();
+            }
+            const response = await this._octokit.repos.getContent({
+                owner,
+                repo,
+                path,
+                ref
+            });
+            if (Array.isArray(response.data)) {
+                let fileCount = 0;
+                for (const item of response.data) {
+                    if (item.type === 'file') {
+                        try {
+                            await this.fetchGitHubFile(owner, repo, item.path, ref);
+                            fileCount++;
+                        }
+                        catch (error) {
+                            console.error(`Failed to fetch ${item.path}:`, error);
+                        }
+                    }
+                }
+                vscode.window.showInformationMessage(`Added ${fileCount} files from ${owner}/${repo}/${path}`);
+            }
+            else {
+                throw new Error('Path does not point to a directory');
+            }
+        }
+        catch (error) {
+            console.error('Error fetching GitHub directory:', error);
+            vscode.window.showErrorMessage(`Failed to fetch GitHub directory: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            throw error;
+        }
+    }
+    /**
+     * Parse GitHub URL and fetch content
+     * @param url GitHub URL (e.g., https://github.com/owner/repo/blob/main/path/to/file.ts)
+     */
+    async fetchFromGitHubUrl(url) {
+        try {
+            const parsed = this.parseGitHubUrl(url);
+            if (!parsed) {
+                throw new Error('Invalid GitHub URL format');
+            }
+            const { owner, repo, path, ref } = parsed;
+            await this.fetchGitHubFile(owner, repo, path, ref);
+        }
+        catch (error) {
+            console.error('Error fetching from GitHub URL:', error);
+            vscode.window.showErrorMessage(`Failed to fetch from GitHub URL: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            throw error;
+        }
+    }
+    /**
+     * Parse GitHub URL into components
+     * @param url GitHub URL
+     * @returns Parsed components or null if invalid
+     */
+    parseGitHubUrl(url) {
+        try {
+            // Handle different GitHub URL formats:
+            // https://github.com/owner/repo/blob/branch/path/to/file
+            // https://github.com/owner/repo/tree/branch/path/to/dir
+            const urlObj = new URL(url);
+            if (urlObj.hostname !== 'github.com') {
+                return null;
+            }
+            const parts = urlObj.pathname.split('/').filter(p => p);
+            if (parts.length < 5) {
+                return null;
+            }
+            const owner = parts[0];
+            const repo = parts[1];
+            const type = parts[2]; // 'blob' or 'tree'
+            const ref = parts[3];
+            const path = parts.slice(4).join('/');
+            return { owner, repo, path, ref };
+        }
+        catch (error) {
+            return null;
+        }
+    }
+    /**
+     * Set GitHub authentication token
+     * @param token GitHub personal access token
+     */
+    setGitHubToken(token) {
+        this.initializeGitHub(token);
+        vscode.window.showInformationMessage('GitHub authentication token updated');
+    }
+    /**
+     * Get repository README content
+     * @param owner Repository owner
+     * @param repo Repository name
+     */
+    async fetchGitHubReadme(owner, repo) {
+        try {
+            if (!this._octokit) {
+                this.initializeGitHub();
+            }
+            const response = await this._octokit.repos.getReadme({
+                owner,
+                repo
+            });
+            const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
+            const contextKey = `${owner}/${repo}/README.md`;
+            this.addGitHubContext(contextKey, content);
+            vscode.window.showInformationMessage(`Added README from ${owner}/${repo}`);
+        }
+        catch (error) {
+            console.error('Error fetching GitHub README:', error);
+            vscode.window.showErrorMessage(`Failed to fetch README: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            throw error;
+        }
     }
 }
 exports.ContextManager = ContextManager;

@@ -129,6 +129,7 @@ class ChatPanel {
     _getHtmlForWebview(webview) {
         const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'reset.css'));
         const styleVscodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'vscode.css'));
+        const styleCustomUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'styles.css'));
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'main.js'));
         return `<!DOCTYPE html>
             <html lang="en">
@@ -137,6 +138,7 @@ class ChatPanel {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <link href="${styleResetUri}" rel="stylesheet">
                 <link href="${styleVscodeUri}" rel="stylesheet">
+                <link href="${styleCustomUri}" rel="stylesheet">
                 <title>AI Assistant Chat</title>
             </head>
             <body>

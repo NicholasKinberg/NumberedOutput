@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OllamaService = void 0;
 const axios_1 = require("axios");
 const vscode = require("vscode");
+const responseFormatter_1 = require("./responseFormatter");
 class OllamaService {
     constructor() {
         const config = vscode.workspace.getConfiguration('numberedOutput');
@@ -27,7 +28,8 @@ class OllamaService {
                 timeout: 30000 // 30 second timeout
             });
             if (response.data && response.data.message) {
-                return this.formatResponse(response.data.message.content);
+                // Use ResponseFormatter for consistent formatting
+                return responseFormatter_1.ResponseFormatter.format(response.data.message.content);
             }
             throw new Error('Invalid response from Ollama');
         }
@@ -44,40 +46,12 @@ class OllamaService {
             throw new Error('Failed to generate response from Ollama');
         }
     }
+    /**
+     * Legacy method - now uses ResponseFormatter
+     * @deprecated Use ResponseFormatter.format() directly
+     */
     formatResponse(content) {
-        // Post-process the response to ensure numbered output
-        // This is a fallback in case the system message doesn't work perfectly
-        const lines = content.split('\n');
-        let formattedLines = [];
-        let stepCounter = 1;
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            // Check if this looks like a step or instruction that should be numbered
-            if (this.shouldBeNumbered(line)) {
-                // Check if it's already numbered
-                if (!/^\d+\./.test(line)) {
-                    formattedLines.push(`${stepCounter}. ${line}`);
-                    stepCounter++;
-                }
-                else {
-                    formattedLines.push(line);
-                }
-            }
-            else {
-                formattedLines.push(line);
-            }
-        }
-        return formattedLines.join('\n');
-    }
-    shouldBeNumbered(line) {
-        // Patterns that indicate this should be numbered
-        const patterns = [
-            /^(create|add|implement|return|check|install|navigate|start|use|set|configure|build|run|test|debug)/i,
-            /^(step|instruction|action|task|process|procedure)/i,
-            /^(first|second|third|next|then|finally|last)/i,
-            /^(function|method|class|variable|import|export)/i
-        ];
-        return patterns.some(pattern => pattern.test(line)) && line.length > 10;
+        return responseFormatter_1.ResponseFormatter.format(content);
     }
     async testConnection() {
         try {
